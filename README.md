@@ -8,8 +8,13 @@ Usage:
 By default, maligned just tells you that an improvement is possible. (When applicable) If you add the [-v] flag, it prints out the order of the field names that you should use in order to optimize its memory usage. Maligned needs to be pointed at an entire package, as it needs to know the size of all the relevant structs. Currently it looks for the package name you point in a path originating from the $GOPATH, and $GOBIN.
 
 Command usage: `maligned [-v] <package1> <package1> ...`
+The easiest way to use this is in conjunction with gometalinter. To run this via gometalinter, run:
 
-In `server/init.go`, there exists the following struct:
+`gometalinter --disable-all --linter='maligned:maligned -v :PATH:LINE:MESSAGE' --enable='maligned' --vendor ./...`
+
+(This depends on you having installed maligned from this fork)
+
+Example usage: Suppose in my repository, there is a file `server/init.go`, which has the following struct:
 ```
 // Storage for init command input parameters
 type InitConfig struct {
@@ -22,7 +27,7 @@ type InitConfig struct {
 
 Sample output:
 ```
-$ cd cosmos/cosmos-sdk
+$ cd cosmos/cosmos-sdk # a repository
 $ maligned ./...
 go/src/github.com/cosmos/cosmos-sdk/server/init.go:58:17: struct of size 48 could be 40
 go/src/github.com/cosmos/cosmos-sdk/store/iavlstore.go:194:19: struct of size 152 could be 144
@@ -30,10 +35,5 @@ go/src/github.com/cosmos/cosmos-sdk/x/stake/validator.go:21:16: struct of size 6
 go/src/github.com/cosmos/cosmos-sdk/x/stake/client/rest/query.go:84:27: struct of size 600 could be 592
 
 $ maligned -v github.com/cosmos/cosmos-sdk/server
-go/src/github.com/cosmos/cosmos-sdk/server/init.go:58:17: struct of size 48 could be 40
-Reorder struct as:
-ChainID
-GenTxsDir
-GenTxs
-Overwrite
+go/src/github.com/cosmos-cosmos-sdk/server/init.go:58:17: struct of size 48 could be 40. Reorder struct variables in the following order {ChainID, GenTxsDir, GenTxs, Overwrite}
 ```

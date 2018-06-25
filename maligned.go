@@ -79,14 +79,16 @@ func malign(pos token.Pos, str *types.Struct, verbose bool) {
 	optFields := optimalFields(str, &s)
 	optSize := (&s).Sizeof(types.NewStruct(optFields, nil))
 	if sz != optSize {
-		fmt.Printf("%s: struct of size %d could be %d\n", fset.Position(pos), sz, optSize)
+		verboseMsg := ""
 		if verbose {
-			fmt.Println("Reorder struct as:")
+			verboseMsg = ". Reorder struct variables in the following order {"
 			for i := 0; i < len(optFields); i++ {
 				x := strings.Split(optFields[i].String(), " ")
-				fmt.Println(x[1])
+				verboseMsg = fmt.Sprintf("%s%s, ", verboseMsg, x[1])
 			}
+			verboseMsg = fmt.Sprintf("%s%s", verboseMsg[:len(verboseMsg)-2], "}")
 		}
+		fmt.Printf("%s: struct of size %d could be %d%s\n", fset.Position(pos), sz, optSize, verboseMsg)
 	}
 }
 
